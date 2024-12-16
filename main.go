@@ -31,7 +31,7 @@ func main() {
 
 	dbConn, err := sql.Open("postgres", dbURl)
 	if err != nil {
-		log.Fatal("Error opening database: %s", err)
+		log.Fatalf("Error opening database: %s", err)
 	}
 	dbQueries := database.New(dbConn)
 
@@ -44,7 +44,7 @@ func main() {
 
 	mux.HandleFunc("/status", apiCfg.handlerStatusCheck)
 
-	mux.HandleFunc("users", apiCfg.handlerUserCreate)
+	mux.HandleFunc("POST /users", apiCfg.handlerUserCreate)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
