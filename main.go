@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/imhasandl/go-restapi/internal/database"
 	"github.com/joho/godotenv"
@@ -13,7 +14,8 @@ import (
 )
 
 type apiConfig struct {
-	db *database.Queries
+	db     *database.Queries
+	status string
 }
 
 func main() {
@@ -28,6 +30,10 @@ func main() {
 	if dbURl == "" {
 		log.Fatal("DB_URL must be set")
 	}
+	status := os.Getenv("STATUS")
+	if status == "" {
+		log.Fatal("Please set your status")
+	}
 
 	dbConn, err := sql.Open("postgres", dbURl)
 	if err != nil {
@@ -36,19 +42,25 @@ func main() {
 	dbQueries := database.New(dbConn)
 
 	apiCfg := apiConfig{
-		db: dbQueries,
+		db:     dbQueries,
+		status: status,
 	}
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir(filepath)))
 
-	mux.HandleFunc("/status", apiCfg.handlerStatusCheck)
+	mux.HandleFunc("GET /status", apiCfg.handlerStatusCheck)
 
-	mux.HandleFunc("POST /users", apiCfg.handlerUserCreate)
+	mux.HandleFunc("POST /api/users", apiCfg.handlerUserCreate)
+	mux.HandleFunc("GET /api/users", apiCfg.handlerListAllUsers)
+	mux.HandleFunc("GET /api/users/{user_id}", apiCfg.handlerGetUserByID)
+
+	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
 
 	srv := &http.Server{
-		Addr:    ":" + port,
-		Handler: mux,
+		Addr:              ":" + port,
+		Handler:           mux,
+		ReadHeaderTimeout: 30 * time.Second,
 	}
 
 	fmt.Printf("Server running on port: %s", port)
