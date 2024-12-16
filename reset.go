@@ -6,6 +6,7 @@ func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
 	if cfg.status != "ADMIN" {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("Reset only allowed in admin environment"))
+		return
 	}
 	err := cfg.db.Reset(r.Context())
 	if err != nil {
