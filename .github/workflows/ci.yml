@@ -19,7 +19,7 @@ jobs:
           go-version: '1.23.0'
 
       - name: Run unit tests
-        run: go test ./... -cover
+        run: go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
 
       - name: Install gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@latest
@@ -41,7 +41,7 @@ jobs:
           go-version: '1.23.0'
 
       - name: Check formatting
-        run: test -z $(go fmt ./...)
+        run: go fmt ./...
 
       - name: Install staticcheck
         run: go install honnef.co/go/tools/cmd/staticcheck@latest
