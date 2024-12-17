@@ -11,6 +11,22 @@ import (
 	"github.com/google/uuid"
 )
 
+const changePostByID = `-- name: ChangePostByID :exec
+UPDATE posts SET
+body = $1, updated_at = NOW()
+WHERE id = $2
+`
+
+type ChangePostByIDParams struct {
+	Body string
+	ID   uuid.UUID
+}
+
+func (q *Queries) ChangePostByID(ctx context.Context, arg ChangePostByIDParams) error {
+	_, err := q.db.ExecContext(ctx, changePostByID, arg.Body, arg.ID)
+	return err
+}
+
 const createPost = `-- name: CreatePost :one
 INSERT INTO posts (id, created_at, updated_at, user_id, body)
 VALUES (
@@ -31,6 +47,33 @@ type CreatePostParams struct {
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
 	row := q.db.QueryRowContext(ctx, createPost, arg.ID, arg.UserID, arg.Body)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.Body,
+	)
+	return i, err
+}
+
+const deletePostByID = `-- name: DeletePostByID :exec
+DELETE FROM posts WHERE id = $1
+`
+
+func (q *Queries) DeletePostByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePostByID, id)
+	return err
+}
+
+const getPostByID = `-- name: GetPostByID :one
+SELECT id, created_at, updated_at, user_id, body FROM posts
+WHERE id = $1
+`
+
+func (q *Queries) GetPostByID(ctx context.Context, id uuid.UUID) (Post, error) {
+	row := q.db.QueryRowContext(ctx, getPostByID, id)
 	var i Post
 	err := row.Scan(
 		&i.ID,
