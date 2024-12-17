@@ -67,7 +67,7 @@ func (cfg *apiConfig) handlerGetUserByID(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	respondWithJSON(w, http.StatusFound, User{
+	respondWithJSON(w, http.StatusOK, User{
 		ID:        userID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,

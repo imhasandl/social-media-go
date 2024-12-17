@@ -46,11 +46,11 @@ func (cfg *apiConfig) handlerCreatePost(w http.ResponseWriter, r *http.Request) 
 
 	respondWithJSON(w, http.StatusOK, responce{
 		Post: Post{
-			ID: post.ID,
+			ID:        post.ID,
 			CreatedAt: post.CreatedAt,
 			UpdatedAt: post.UpdatedAt,
-			UserID: post.UserID,
-			Body: post.Body,
+			UserID:    post.UserID,
+			Body:      post.Body,
 		},
 	})
 }
@@ -66,13 +66,67 @@ func (cfg *apiConfig) handlerListPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *apiConfig) hanlerGetPostByID(w http.ResponseWriter, r *http.Request) {
-	
+	postIDString := r.PathValue("post_id")
+	postID, err := uuid.Parse(postIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't parse the post id provided", err)
+		return
+	}
+
+	post, err := cfg.db.GetPostByID(r.Context(), postID)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't get post from db", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, Post{
+		ID:        post.ID,
+		CreatedAt: post.CreatedAt,
+		UpdatedAt: post.UpdatedAt,
+		UserID:    post.UserID,
+		Body:      post.Body,
+	})
 }
 
 func (cfg *apiConfig) handlerChangePostByID(w http.ResponseWriter, r *http.Request) {
-	
+	type parameters struct {
+		ID   uuid.UUID `json:"id"`
+		Body string    `json:"body"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		respondWithJSON(w, http.StatusBadRequest, "can't decode body")
+		return
+	}
+
+	err = cfg.db.ChangePostByID(r.Context(), database.ChangePostByIDParams{
+		Body: params.Body,
+		ID:   params.ID,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't change the post by id", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (cfg *apiConfig) handlerDeletePostByID(w http.ResponseWriter, r *http.Request) {
-	
+	postIDString := r.PathValue("post_id")
+	postID, err := uuid.Parse(postIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't parse the post id", err)
+		return
+	}
+
+	err = cfg.db.DeletePostByID(r.Context(), postID)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't delete the post", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
