@@ -8,7 +8,7 @@ func (cfg *apiConfig) handlerResetUsers(w http.ResponseWriter, r *http.Request) 
 		w.Write([]byte("Reset only allowed in admin environment"))
 		return
 	}
-	err := cfg.db.Reset(r.Context())
+	err := cfg.db.ResetUsers(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "can't reset users", err)
 		return
