@@ -64,3 +64,15 @@ func (cfg *apiConfig) handlerListPosts(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusOK, posts)
 }
+
+func (cfg *apiConfig) hanlerGetPostByID(w http.ResponseWriter, r *http.Request) {
+	
+}
+
+func (cfg *apiConfig) handlerChangePostByID(w http.ResponseWriter, r *http.Request) {
+	
+}
+
+func (cfg *apiConfig) handlerDeletePostByID(w http.ResponseWriter, r *http.Request) {
+	
+}

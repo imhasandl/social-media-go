@@ -54,10 +54,15 @@ func main() {
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUserCreate)
 	mux.HandleFunc("GET /api/users", apiCfg.handlerListAllUsers)
 	mux.HandleFunc("GET /api/users/{user_id}", apiCfg.handlerGetUserByID)
+
 	mux.HandleFunc("POST /api/posts", apiCfg.handlerCreatePost)
 	mux.HandleFunc("GET /api/posts", apiCfg.handlerListPosts)
+	mux.HandleFunc("GET /api/posts/{post_id}", apiCfg.hanlerGetPostByID)
+	mux.HandleFunc("PUT /api/posts/{post_id}", apiCfg.handlerChangePostByID)
+	mux.HandleFunc("DELETE /api/posts/{post_id}", apiCfg.handlerDeletePostByID)
 
-	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
+	mux.HandleFunc("POST /admin/reset/users", apiCfg.handlerResetUsers)
+	mux.HandleFunc("POST /admin/reset/posts", apiCfg.handlerResetPosts)
 
 	srv := &http.Server{
 		Addr:              ":" + port,
@@ -65,6 +70,6 @@ func main() {
 		ReadHeaderTimeout: 30 * time.Second,
 	}
 
-	fmt.Printf("Server running on port: %s", port)
+	fmt.Printf("Server running on port: %s\n", port)
 	log.Fatal(srv.ListenAndServe())
 }
