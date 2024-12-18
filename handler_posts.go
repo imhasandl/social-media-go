@@ -90,13 +90,19 @@ func (cfg *apiConfig) hanlerGetPostByID(w http.ResponseWriter, r *http.Request) 
 
 func (cfg *apiConfig) handlerChangePostByID(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		ID   uuid.UUID `json:"id"`
 		Body string    `json:"body"`
+	}
+
+	postIDString := r.PathValue("post_id")
+	postID, err := uuid.Parse(postIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't parse the post id", err)
+		return
 	}
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		respondWithJSON(w, http.StatusBadRequest, "can't decode body")
 		return
@@ -104,7 +110,7 @@ func (cfg *apiConfig) handlerChangePostByID(w http.ResponseWriter, r *http.Reque
 
 	err = cfg.db.ChangePostByID(r.Context(), database.ChangePostByIDParams{
 		Body: params.Body,
-		ID:   params.ID,
+		ID:   postID,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "can't change the post by id", err)

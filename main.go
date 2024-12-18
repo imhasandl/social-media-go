@@ -53,14 +53,17 @@ func main() {
 
 	mux.HandleFunc("GET /status", apiCfg.handlerStatusCheck)
 
-	mux.HandleFunc("POST /api/users", apiCfg.handlerUserCreate)
+	mux.HandleFunc("POST /api/users/login", apiCfg.handlerUserLogin)
+	mux.HandleFunc("POST /api/users/register", apiCfg.handlerUserCreate)
+
 	mux.HandleFunc("GET /api/users", apiCfg.handlerListAllUsers)
+	mux.HandleFunc("GET /api/users/", apiCfg.handlerGetUserByEmail)
 	mux.HandleFunc("GET /api/users/{user_id}", apiCfg.handlerGetUserByID)
 
 	mux.HandleFunc("POST /api/posts", apiCfg.handlerCreatePost)
 	mux.HandleFunc("GET /api/posts", apiCfg.handlerListPosts)
 	mux.HandleFunc("GET /api/posts/{post_id}", apiCfg.hanlerGetPostByID)
-	mux.HandleFunc("PUT /api/posts/", apiCfg.handlerChangePostByID)
+	mux.HandleFunc("PUT /api/posts/{post_id}", apiCfg.handlerChangePostByID)
 	mux.HandleFunc("DELETE /api/posts/{post_id}", apiCfg.handlerDeletePostByID)
 
 	mux.HandleFunc("POST /admin/reset/users", apiCfg.handlerResetUsers)
