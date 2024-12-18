@@ -14,11 +14,13 @@ func (cfg *apiConfig) handlerResetUsers(w http.ResponseWriter, r *http.Request) 
 		}
 		return
 	}
+	
 	err := cfg.db.ResetUsers(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "can't reset users", err)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte("Reset users table, completed"))
 	if err != nil {
@@ -35,11 +37,13 @@ func (cfg *apiConfig) handlerResetPosts(w http.ResponseWriter, r *http.Request) 
 		}
 		return
 	}
+
 	err := cfg.db.ResetUsers(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "can't reset posts", err)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte("Reset posts table, completed"))
 	if err != nil {

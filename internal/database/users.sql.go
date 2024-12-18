@@ -12,35 +12,56 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, created_at, updated_at, email)
+INSERT INTO users (id, created_at, updated_at, email, password)
 VALUES (
    $1,
    NOW(),
    NOW(),
-   $2
+   $2,
+   $3
 )
-RETURNING id, created_at, updated_at, email
+RETURNING id, created_at, updated_at, email, password
 `
 
 type CreateUserParams struct {
-	ID    uuid.UUID
-	Email string
+	ID       uuid.UUID
+	Email    string
+	Password string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.ID, arg.Email)
+	row := q.db.QueryRowContext(ctx, createUser, arg.ID, arg.Email, arg.Password)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Email,
+		&i.Password,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, created_at, updated_at, email, password FROM users
+WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Password,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, created_at, updated_at, email FROM users
+SELECT id, created_at, updated_at, email, password FROM users
 WHERE id = $1
 `
 
@@ -52,12 +73,13 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Email,
+		&i.Password,
 	)
 	return i, err
 }
 
 const listAllUsers = `-- name: ListAllUsers :many
-SELECT id, created_at, updated_at, email FROM users
+SELECT id, created_at, updated_at, email, password FROM users
 `
 
 func (q *Queries) ListAllUsers(ctx context.Context) ([]User, error) {
@@ -74,6 +96,7 @@ func (q *Queries) ListAllUsers(ctx context.Context) ([]User, error) {
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Email,
+			&i.Password,
 		); err != nil {
 			return nil, err
 		}
