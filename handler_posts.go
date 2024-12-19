@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/imhasandl/go-restapi/internal/auth"
 	"github.com/imhasandl/go-restapi/internal/database"
 )
 
@@ -19,16 +20,27 @@ type Post struct {
 
 func (cfg *apiConfig) handlerCreatePost(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		UserID uuid.UUID `json:"user_id"`
-		Body   string    `json:"body"`
+		Body string `json:"body"`
 	}
 	type responce struct {
 		Post
 	}
 
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid header bearer", err)
+		return
+	}
+
+	userID, err := auth.ValidateJWT(token, cfg.jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't validate JWT", err)
+		return
+	}
+
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "can't decode the body", err)
 		return
@@ -36,7 +48,7 @@ func (cfg *apiConfig) handlerCreatePost(w http.ResponseWriter, r *http.Request) 
 
 	post, err := cfg.db.CreatePost(r.Context(), database.CreatePostParams{
 		ID:     uuid.New(),
-		UserID: params.UserID,
+		UserID: userID,
 		Body:   params.Body,
 	})
 	if err != nil {
@@ -90,7 +102,7 @@ func (cfg *apiConfig) hanlerGetPostByID(w http.ResponseWriter, r *http.Request) 
 
 func (cfg *apiConfig) handlerChangePostByID(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Body string    `json:"body"`
+		Body string `json:"body"`
 	}
 
 	postIDString := r.PathValue("post_id")
