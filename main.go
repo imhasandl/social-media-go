@@ -62,12 +62,13 @@ func main() {
 
 	mux.HandleFunc("POST /api/posts", apiCfg.handlerCreatePost)
 	mux.HandleFunc("GET /api/posts", apiCfg.handlerListPosts)
+	
 	mux.HandleFunc("GET /api/posts/{post_id}", apiCfg.hanlerGetPostByID)
 	mux.HandleFunc("PUT /api/posts/{post_id}", apiCfg.handlerChangePostByID)
 	mux.HandleFunc("DELETE /api/posts/{post_id}", apiCfg.handlerDeletePostByID)
 
-	mux.HandleFunc("POST /admin/reset/users", apiCfg.handlerResetUsers)
-	mux.HandleFunc("POST /admin/reset/posts", apiCfg.handlerResetPosts)
+	mux.HandleFunc("DELETE /admin/reset/users", apiCfg.handlerResetUsers)
+	mux.HandleFunc("DELETE /admin/reset/posts", apiCfg.handlerResetPosts)
 
 	srv := &http.Server{
 		Addr:              ":" + port,
