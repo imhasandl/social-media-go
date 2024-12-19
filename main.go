@@ -14,8 +14,9 @@ import (
 )
 
 type apiConfig struct {
-	db     *database.Queries
-	status string
+	db        *database.Queries
+	status    string
+	jwtSecret string
 }
 
 func main() {
@@ -36,6 +37,10 @@ func main() {
 	if status == "" {
 		log.Fatal("Please set your status")
 	}
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET environment variable should be set")
+	}
 
 	dbConn, err := sql.Open("postgres", dbURl)
 	if err != nil {
@@ -44,8 +49,9 @@ func main() {
 	dbQueries := database.New(dbConn)
 
 	apiCfg := apiConfig{
-		db:     dbQueries,
-		status: status,
+		db:        dbQueries,
+		status:    status,
+		jwtSecret: jwtSecret,
 	}
 
 	mux := http.NewServeMux()
@@ -62,7 +68,7 @@ func main() {
 
 	mux.HandleFunc("POST /api/posts", apiCfg.handlerCreatePost)
 	mux.HandleFunc("GET /api/posts", apiCfg.handlerListPosts)
-	
+
 	mux.HandleFunc("GET /api/posts/{post_id}", apiCfg.hanlerGetPostByID)
 	mux.HandleFunc("PUT /api/posts/{post_id}", apiCfg.handlerChangePostByID)
 	mux.HandleFunc("DELETE /api/posts/{post_id}", apiCfg.handlerDeletePostByID)
