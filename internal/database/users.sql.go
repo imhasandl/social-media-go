@@ -11,6 +11,31 @@ import (
 	"github.com/google/uuid"
 )
 
+const changeUser = `-- name: ChangeUser :one
+UPDATE users SET email = $1, updated_at = NOW(), password = $2
+WHERE id = $3
+RETURNING id, created_at, updated_at, email, password
+`
+
+type ChangeUserParams struct {
+	Email    string
+	Password string
+	ID       uuid.UUID
+}
+
+func (q *Queries) ChangeUser(ctx context.Context, arg ChangeUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, changeUser, arg.Email, arg.Password, arg.ID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Password,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, created_at, updated_at, email, password)
 VALUES (
