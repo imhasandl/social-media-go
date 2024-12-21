@@ -77,7 +77,7 @@ func (cfg *apiConfig) handlerListPosts(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, posts)
 }
 
-func (cfg *apiConfig) hanlerGetPostByID(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) handlerGetPostByID(w http.ResponseWriter, r *http.Request) {
 	postIDString := r.PathValue("post_id")
 	postID, err := uuid.Parse(postIDString)
 	if err != nil {
@@ -137,6 +137,29 @@ func (cfg *apiConfig) handlerDeletePostByID(w http.ResponseWriter, r *http.Reque
 	postID, err := uuid.Parse(postIDString)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "can't parse the post id", err)
+		return
+	}
+
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "can't get header token", err)
+		return
+	}
+
+	userID, err := auth.ValidateJWT(token, cfg.jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "jwt token is not correct one", err)
+		return
+	}
+
+	post, err := cfg.db.GetPostByID(r.Context(), postID)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "can't get the post by id", err)
+		return
+	}
+
+	if post.UserID != userID {
+		respondWithError(w, http.StatusForbidden, "you can't delete this chirp", err)
 		return
 	}
 
