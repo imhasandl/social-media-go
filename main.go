@@ -69,10 +69,9 @@ func main() {
 	mux.HandleFunc("GET /api/users/", apiCfg.handlerGetUserByEmail)
 	mux.HandleFunc("GET /api/users/{user_id}", apiCfg.handlerGetUserByID)
 
-	mux.HandleFunc("POST /api/posts", apiCfg.handlerCreatePost)
 	mux.HandleFunc("GET /api/posts", apiCfg.handlerListPosts)
-
-	mux.HandleFunc("GET /api/posts/{post_id}", apiCfg.hanlerGetPostByID)
+	mux.HandleFunc("POST /api/posts", apiCfg.handlerCreatePost)
+	mux.HandleFunc("GET /api/posts/{post_id}", apiCfg.handlerGetPostByID)
 	mux.HandleFunc("PUT /api/posts/{post_id}", apiCfg.handlerChangePostByID)
 	mux.HandleFunc("DELETE /api/posts/{post_id}", apiCfg.handlerDeletePostByID)
 
