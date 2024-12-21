@@ -18,7 +18,7 @@ type TokenType string
 
 const (
 	// TokenTypeAccess -
-	TokenTypeAccess TokenType = "chirpy-access"
+	TokenTypeAccess TokenType = "media-access"
 )
 
 func HashPassword(password string) (string, error) {

@@ -9,6 +9,11 @@ VALUES (
 )
 RETURNING *;
 
+-- name: ChangeUser :one
+UPDATE users SET email = $1, updated_at = NOW(), password = $2
+WHERE id = $3
+RETURNING *;
+
 -- name: ListAllUsers :many
 SELECT * FROM users;
 
