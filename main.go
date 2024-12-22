@@ -14,9 +14,10 @@ import (
 )
 
 type apiConfig struct {
-	db        *database.Queries
-	status    string
-	jwtSecret string
+	db         *database.Queries
+	status     string
+	jwtSecret  string
+	webhookKey string
 }
 
 func main() {
@@ -41,6 +42,10 @@ func main() {
 	if jwtSecret == "" {
 		log.Fatal("JWT_SECRET environment variable should be set")
 	}
+	webhookKey := os.Getenv("WEBHOOK_KEY")
+	if webhookKey == "" {
+		log.Fatal("set the webhook key")
+	}
 
 	dbConn, err := sql.Open("postgres", dbURl)
 	if err != nil {
@@ -49,9 +54,10 @@ func main() {
 	dbQueries := database.New(dbConn)
 
 	apiCfg := apiConfig{
-		db:        dbQueries,
-		status:    status,
-		jwtSecret: jwtSecret,
+		db:         dbQueries,
+		status:     status,
+		jwtSecret:  jwtSecret,
+		webhookKey: webhookKey,
 	}
 
 	mux := http.NewServeMux()
