@@ -6,7 +6,7 @@ This is a simple RESTful API written in Golang.
 
 ## Documentation
 
-There is 18 types of request, but here are the essential ones and you can check the rest of them in the code.
+There is 18 types of requests, but here in documentation are only essential ones and you can check the rest of them in the main file.
 
 WARNING: The main function contains request that can delete all user from database and posts, so be careful. 
 
