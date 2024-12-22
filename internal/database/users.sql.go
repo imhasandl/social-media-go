@@ -14,7 +14,7 @@ import (
 const changeUser = `-- name: ChangeUser :one
 UPDATE users SET email = $1, updated_at = NOW(), password = $2
 WHERE id = $3
-RETURNING id, created_at, updated_at, email, password
+RETURNING id, created_at, updated_at, email, password, is_premium
 `
 
 type ChangeUserParams struct {
@@ -32,6 +32,7 @@ func (q *Queries) ChangeUser(ctx context.Context, arg ChangeUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Email,
 		&i.Password,
+		&i.IsPremium,
 	)
 	return i, err
 }
@@ -45,7 +46,7 @@ VALUES (
    $2,
    $3
 )
-RETURNING id, created_at, updated_at, email, password
+RETURNING id, created_at, updated_at, email, password, is_premium
 `
 
 type CreateUserParams struct {
@@ -63,12 +64,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Email,
 		&i.Password,
+		&i.IsPremium,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, created_at, updated_at, email, password FROM users
+SELECT id, created_at, updated_at, email, password, is_premium FROM users
 WHERE email = $1
 `
 
@@ -81,12 +83,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.UpdatedAt,
 		&i.Email,
 		&i.Password,
+		&i.IsPremium,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, created_at, updated_at, email, password FROM users
+SELECT id, created_at, updated_at, email, password, is_premium FROM users
 WHERE id = $1
 `
 
@@ -99,12 +102,13 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.UpdatedAt,
 		&i.Email,
 		&i.Password,
+		&i.IsPremium,
 	)
 	return i, err
 }
 
 const listAllUsers = `-- name: ListAllUsers :many
-SELECT id, created_at, updated_at, email, password FROM users
+SELECT id, created_at, updated_at, email, password, is_premium FROM users
 `
 
 func (q *Queries) ListAllUsers(ctx context.Context) ([]User, error) {
@@ -122,6 +126,7 @@ func (q *Queries) ListAllUsers(ctx context.Context) ([]User, error) {
 			&i.UpdatedAt,
 			&i.Email,
 			&i.Password,
+			&i.IsPremium,
 		); err != nil {
 			return nil, err
 		}
@@ -134,4 +139,24 @@ func (q *Queries) ListAllUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const upgradeToPremium = `-- name: UpgradeToPremium :one
+UPDATE users SET is_premium = true, updated_at = NOW()
+WHERE id = $1
+RETURNING id, created_at, updated_at, email, password, is_premium
+`
+
+func (q *Queries) UpgradeToPremium(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRowContext(ctx, upgradeToPremium, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Password,
+		&i.IsPremium,
+	)
+	return i, err
 }

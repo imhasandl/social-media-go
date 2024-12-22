@@ -24,3 +24,8 @@ WHERE id = $1;
 -- name: GetUserByEmail :one
 SELECT * FROM users
 WHERE email = $1;
+
+-- name: UpgradeToPremium :one
+UPDATE users SET is_premium = true, updated_at = NOW()
+WHERE id = $1
+RETURNING *;

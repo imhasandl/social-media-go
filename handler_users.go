@@ -16,6 +16,7 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
 	Password  string    `json:"-"`
+	IsPremium bool      `json:"is_premium"`
 }
 
 func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +33,7 @@ func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) 
 	params := parameters{}
 	err := decoder.Decode(&params)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Can't decode body", err)
+		respondWithError(w, http.StatusBadRequest, "can't decode body", err)
 		return
 	}
 
@@ -48,7 +49,8 @@ func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) 
 		Password: hashedPassword,
 	})
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Can't create user", err)
+		respondWithError(w, http.StatusBadRequest, "can't create user", err)
+		return
 	}
 
 	respondWithJSON(w, http.StatusOK, response{
@@ -57,6 +59,7 @@ func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) 
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 			Email:     user.Email,
+			IsPremium: user.IsPremium,
 		},
 	})
 }
@@ -89,13 +92,14 @@ func (cfg *apiConfig) handlerGetUserByEmail(w http.ResponseWriter, r *http.Reque
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 			Email:     user.Email,
+			IsPremium: user.IsPremium,
 		},
 	})
 }
 
 func (cfg *apiConfig) handlerUserChange(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Email string `json:"email"`
+		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 	type response struct {
@@ -129,9 +133,9 @@ func (cfg *apiConfig) handlerUserChange(w http.ResponseWriter, r *http.Request) 
 	}
 
 	user, err := cfg.db.ChangeUser(r.Context(), database.ChangeUserParams{
-		Email: params.Email,
+		Email:    params.Email,
 		Password: hashedPassword,
-		ID: userID,
+		ID:       userID,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "can't change user", err)
@@ -140,10 +144,11 @@ func (cfg *apiConfig) handlerUserChange(w http.ResponseWriter, r *http.Request) 
 
 	respondWithJSON(w, http.StatusAccepted, response{
 		User: User{
-			ID: user.ID,
+			ID:        user.ID,
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
-			Email: user.Email,
+			Email:     user.Email,
+			IsPremium: user.IsPremium,
 		},
 	})
 }
@@ -167,6 +172,7 @@ func (cfg *apiConfig) handlerGetUserByID(w http.ResponseWriter, r *http.Request)
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		Email:     user.Email,
+		IsPremium: user.IsPremium,
 	})
 }
 
