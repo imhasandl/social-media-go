@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/imhasandl/go-restapi/internal/auth"
 )
 
 func (cfg *apiConfig) handlerWebhook(w http.ResponseWriter, r *http.Request) {
@@ -22,6 +23,17 @@ func (cfg *apiConfig) handlerWebhook(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusInsufficientStorage, "can't decode the body", err)
+		return
+	}
+
+	apiKey, err := auth.GetAPIKey(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "can't get api key from header", err)
+		return
+	}
+
+	if apiKey != cfg.webhookKey {
+		respondWithError(w, http.StatusUnauthorized, "webhook not match", err)
 		return
 	}
 
