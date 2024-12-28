@@ -26,6 +26,14 @@ WHERE id = $1;
 SELECT * FROM users
 WHERE email = $1;
 
+-- name: GetUserByUsername :one
+SELECT * FROM users
+WHERE username = $1;
+
+-- name: CheckIfUsernameOrEmailTaken :one
+SELECT id from users
+WHERE username = $1 or email = $2;
+
 -- name: UpgradeToPremium :one
 UPDATE users SET is_premium = true, updated_at = NOW()
 WHERE id = $1

@@ -70,13 +70,13 @@ func main() {
 	mux.HandleFunc("PUT /api/users/change", apiCfg.handlerUserChange)
 	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
 	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevoke)
-	
 
 	mux.HandleFunc("POST /api/webhooks", apiCfg.handlerWebhook)
 
 	mux.HandleFunc("GET /api/users", apiCfg.handlerListAllUsers)
-	mux.HandleFunc("GET /api/users/", apiCfg.handlerGetUserByEmail)
-	mux.HandleFunc("GET /api/users/{user_id}", apiCfg.handlerGetUserByID)
+	mux.HandleFunc("GET /api/users/id/{user_id}", apiCfg.handlerGetUserByID)
+	mux.HandleFunc("GET /api/users/email", apiCfg.handlerGetUserByEmail)
+	mux.HandleFunc("GET /api/users/username", apiCfg.handlerGetUserByUsername)
 
 	mux.HandleFunc("GET /api/posts", apiCfg.handlerListPosts)
 	mux.HandleFunc("POST /api/posts", apiCfg.handlerCreatePost)

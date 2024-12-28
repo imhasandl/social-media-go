@@ -38,6 +38,23 @@ func (q *Queries) ChangeUser(ctx context.Context, arg ChangeUserParams) (User, e
 	return i, err
 }
 
+const checkIfUsernameOrEmailTaken = `-- name: CheckIfUsernameOrEmailTaken :one
+SELECT id from users
+WHERE username = $1 or email = $2
+`
+
+type CheckIfUsernameOrEmailTakenParams struct {
+	Username string
+	Email    string
+}
+
+func (q *Queries) CheckIfUsernameOrEmailTaken(ctx context.Context, arg CheckIfUsernameOrEmailTakenParams) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, checkIfUsernameOrEmailTaken, arg.Username, arg.Email)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, created_at, updated_at, email, username, password)
 VALUES (
@@ -105,6 +122,26 @@ WHERE id = $1
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.Password,
+		&i.IsPremium,
+		&i.Username,
+	)
+	return i, err
+}
+
+const getUserByUsername = `-- name: GetUserByUsername :one
+SELECT id, created_at, updated_at, email, password, is_premium, username FROM users
+WHERE username = $1
+`
+
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByUsername, username)
 	var i User
 	err := row.Scan(
 		&i.ID,
