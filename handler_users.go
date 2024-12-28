@@ -15,15 +15,16 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
+	Username  string    `json:"username"`
 	Password  string    `json:"-"`
 	IsPremium bool      `json:"is_premium"`
 }
 
 func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		ID       uuid.UUID `json:"id"`
-		Email    string    `json:"email"`
-		Password string    `json:"password"`
+		Email    string `json:"email"`
+		Username string `json:"username"`
+		Password string `json:"password"`
 	}
 	type response struct {
 		User
@@ -46,6 +47,7 @@ func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) 
 	user, err := cfg.db.CreateUser(r.Context(), database.CreateUserParams{
 		ID:       uuid.New(),
 		Email:    params.Email,
+		Username: params.Username,
 		Password: hashedPassword,
 	})
 	if err != nil {
@@ -59,6 +61,7 @@ func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) 
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 			Email:     user.Email,
+			Username:  user.Username,
 			IsPremium: user.IsPremium,
 		},
 	})
@@ -92,6 +95,7 @@ func (cfg *apiConfig) handlerGetUserByEmail(w http.ResponseWriter, r *http.Reque
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 			Email:     user.Email,
+			Username:  user.Username,
 			IsPremium: user.IsPremium,
 		},
 	})
@@ -148,6 +152,7 @@ func (cfg *apiConfig) handlerUserChange(w http.ResponseWriter, r *http.Request) 
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 			Email:     user.Email,
+			Username:  user.Username,
 			IsPremium: user.IsPremium,
 		},
 	})
@@ -172,6 +177,7 @@ func (cfg *apiConfig) handlerGetUserByID(w http.ResponseWriter, r *http.Request)
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		Email:     user.Email,
+		Username:  user.Username,
 		IsPremium: user.IsPremium,
 	})
 }

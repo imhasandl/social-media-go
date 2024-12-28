@@ -35,4 +35,5 @@ type User struct {
 	Email     string
 	Password  string
 	IsPremium bool
+	Username  string
 }

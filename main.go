@@ -70,6 +70,7 @@ func main() {
 	mux.HandleFunc("PUT /api/users/change", apiCfg.handlerUserChange)
 	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
 	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevoke)
+	
 
 	mux.HandleFunc("POST /api/webhooks", apiCfg.handlerWebhook)
 
