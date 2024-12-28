@@ -38,6 +38,15 @@ func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	_, err = cfg.db.CheckIfUsernameOrEmailTaken(r.Context(), database.CheckIfUsernameOrEmailTakenParams{
+		Username: params.Username,
+		Email: params.Email,
+	})
+	if err == nil {
+		respondWithError(w, http.StatusUnauthorized, "username or email alredy taken", err)
+		return
+	}
+
 	hashedPassword, err := auth.HashPassword(params.Password)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "can't hash the password", err)
@@ -86,6 +95,40 @@ func (cfg *apiConfig) handlerGetUserByEmail(w http.ResponseWriter, r *http.Reque
 	user, err := cfg.db.GetUserByEmail(r.Context(), params.Email)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "can't get user by email", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, response{
+		User: User{
+			ID:        user.ID,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+			Email:     user.Email,
+			Username:  user.Username,
+			IsPremium: user.IsPremium,
+		},
+	})
+}
+
+func (cfg *apiConfig) handlerGetUserByUsername(w http.ResponseWriter, r *http.Request) {
+	type parameters struct {
+		Username string `json:"username"`
+	}
+	type response struct {
+		User
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "can't get user bu username", err)
+		return
+	}
+
+	user, err := cfg.db.GetUserByUsername(r.Context(), params.Username)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "can't get user by username", err)
 		return
 	}
 
