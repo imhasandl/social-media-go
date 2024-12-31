@@ -18,6 +18,15 @@ func (q *Queries) ResetPosts(ctx context.Context) error {
 	return err
 }
 
+const resetReports = `-- name: ResetReports :exec
+DELETE FROM reports
+`
+
+func (q *Queries) ResetReports(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetReports)
+	return err
+}
+
 const resetUsers = `-- name: ResetUsers :exec
 DELETE FROM users
 `

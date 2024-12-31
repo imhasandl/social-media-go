@@ -84,9 +84,13 @@ func main() {
 	mux.HandleFunc("PUT /api/posts/{post_id}", apiCfg.handlerChangePostByID)
 	mux.HandleFunc("DELETE /api/posts/{post_id}", apiCfg.handlerDeletePostByID)
 
+
+	mux.HandleFunc("POST /api/posts/report/{post_id}", apiCfg.handlerReportPost)
+
 	mux.HandleFunc("DELETE /admin/reset/users", apiCfg.handlerResetUsers)
 	mux.HandleFunc("DELETE /admin/reset/posts", apiCfg.handlerResetPosts)
-
+	mux.HandleFunc("DELETE /admin/reset/reports", apiCfg.handlerDeleteAllReports)
+	
 	srv := &http.Server{
 		Addr:              ":" + port,
 		Handler:           mux,
