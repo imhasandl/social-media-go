@@ -65,19 +65,17 @@ func main() {
 
 	mux.HandleFunc("GET /status", apiCfg.handlerStatusCheck)
 
+	// USERS
 	mux.HandleFunc("POST /api/users/register", apiCfg.handlerUserCreate)
 	mux.HandleFunc("POST /api/users/login", apiCfg.handlerUserLogin)
 	mux.HandleFunc("PUT /api/users/change", apiCfg.handlerUserChange)
-	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
-	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevoke)
-
-	mux.HandleFunc("POST /api/webhooks", apiCfg.handlerWebhook)
 
 	mux.HandleFunc("GET /api/users", apiCfg.handlerListAllUsers)
 	mux.HandleFunc("GET /api/users/id/{user_id}", apiCfg.handlerGetUserByID)
 	mux.HandleFunc("GET /api/users/email", apiCfg.handlerGetUserByEmail)
 	mux.HandleFunc("GET /api/users/username", apiCfg.handlerGetUserByUsername)
-
+	
+	// POSTS
 	mux.HandleFunc("POST /api/posts", apiCfg.handlerCreatePost)
 	mux.HandleFunc("GET /api/posts", apiCfg.handlerListPosts)
 	mux.HandleFunc("GET /api/posts/{post_id}", apiCfg.handlerGetPostByID)
@@ -89,6 +87,12 @@ func main() {
 	mux.HandleFunc("GET /api/posts/reports/{report_id}", apiCfg.handlerGetReportByID)
 	mux.HandleFunc("DELETE /api/posts/reports/{report_id}", apiCfg.handlerDeleteReportByID)
 
+	// OTHER
+	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
+	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevoke)
+	
+	mux.HandleFunc("POST /api/webhooks", apiCfg.handlerWebhook)
+
 	mux.HandleFunc("DELETE /admin/reset/users", apiCfg.handlerResetUsers)
 	mux.HandleFunc("DELETE /admin/reset/posts", apiCfg.handlerResetPosts)
 	mux.HandleFunc("DELETE /admin/reset/reports", apiCfg.handlerResetReports)
@@ -97,6 +101,9 @@ func main() {
 		Addr:              ":" + port,
 		Handler:           mux,
 		ReadHeaderTimeout: 30 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		ReadTimeout:       30 * time.Second,
 	}
 
 	fmt.Printf("Server running on port: %s\n", port)

@@ -108,7 +108,7 @@ func (cfg *apiConfig) handlerChangePostByID(w http.ResponseWriter, r *http.Reque
 	postIDString := r.PathValue("post_id")
 	postID, err := uuid.Parse(postIDString)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "can't parse the post id", err)
+		respondWithError(w, http.StatusBadRequest, "can't parse the post id - handlerChangePostByID", err)
 		return
 	}
 
@@ -116,7 +116,7 @@ func (cfg *apiConfig) handlerChangePostByID(w http.ResponseWriter, r *http.Reque
 	params := parameters{}
 	err = decoder.Decode(&params)
 	if err != nil {
-		respondWithJSON(w, http.StatusBadRequest, "can't decode body")
+		respondWithJSON(w, http.StatusBadRequest, "can't decode body - handlerChangePostByID")
 		return
 	}
 
@@ -125,7 +125,7 @@ func (cfg *apiConfig) handlerChangePostByID(w http.ResponseWriter, r *http.Reque
 		ID:   postID,
 	})
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "can't change the post by id", err)
+		respondWithError(w, http.StatusBadRequest, "can't change the post by id - handlerChangePostByID", err)
 		return
 	}
 
@@ -136,36 +136,36 @@ func (cfg *apiConfig) handlerDeletePostByID(w http.ResponseWriter, r *http.Reque
 	postIDString := r.PathValue("post_id")
 	postID, err := uuid.Parse(postIDString)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "can't parse the post id", err)
+		respondWithError(w, http.StatusBadRequest, "can't parse the post id - handlerDeletePostByID", err)
 		return
 	}
 
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "can't get header token", err)
+		respondWithError(w, http.StatusUnauthorized, "can't get header token - handlerDeletePostByID", err)
 		return
 	}
 
 	userID, err := auth.ValidateJWT(token, cfg.jwtSecret)
 	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "jwt token is not correct one", err)
+		respondWithError(w, http.StatusUnauthorized, "jwt token is not correct one - handlerDeletePostByID", err)
 		return
 	}
 
 	post, err := cfg.db.GetPostByID(r.Context(), postID)
 	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "can't get the post by id", err)
+		respondWithError(w, http.StatusUnauthorized, "can't get the post by id - handlerDeletePostByID", err)
 		return
 	}
 
 	if post.UserID != userID {
-		respondWithError(w, http.StatusForbidden, "you can't delete this chirp", err)
+		respondWithError(w, http.StatusForbidden, "you can't delete this chirp - handlerDeletePostByID", err)
 		return
 	}
 
 	err = cfg.db.DeletePostByID(r.Context(), postID)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "can't delete the post", err)
+		respondWithError(w, http.StatusBadRequest, "can't delete the post - handlerDeletePostByID", err)
 		return
 	}
 
