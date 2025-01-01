@@ -6,7 +6,7 @@ CREATE TABLE reports (
    post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
    reason TEXT NOT NULL
-)
+);
 
 -- +goose Down
 DROP TABLE reports;

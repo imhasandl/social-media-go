@@ -78,18 +78,21 @@ func main() {
 	mux.HandleFunc("GET /api/users/email", apiCfg.handlerGetUserByEmail)
 	mux.HandleFunc("GET /api/users/username", apiCfg.handlerGetUserByUsername)
 
-	mux.HandleFunc("GET /api/posts", apiCfg.handlerListPosts)
 	mux.HandleFunc("POST /api/posts", apiCfg.handlerCreatePost)
+	mux.HandleFunc("GET /api/posts", apiCfg.handlerListPosts)
 	mux.HandleFunc("GET /api/posts/{post_id}", apiCfg.handlerGetPostByID)
 	mux.HandleFunc("PUT /api/posts/{post_id}", apiCfg.handlerChangePostByID)
 	mux.HandleFunc("DELETE /api/posts/{post_id}", apiCfg.handlerDeletePostByID)
 
-	mux.HandleFunc("POST /api/posts/report", apiCfg.handlerReportPost) //
+	mux.HandleFunc("POST /api/posts/reports", apiCfg.handlerReportPost)
+	mux.HandleFunc("GET /api/posts/reports", apiCfg.handlerListAllReports)
+	mux.HandleFunc("GET /api/posts/reports/{report_id}", apiCfg.handlerGetReportByID)
+	mux.HandleFunc("DELETE /api/posts/reports/{report_id}", apiCfg.handlerDeleteReportByID)
 
 	mux.HandleFunc("DELETE /admin/reset/users", apiCfg.handlerResetUsers)
 	mux.HandleFunc("DELETE /admin/reset/posts", apiCfg.handlerResetPosts)
-	mux.HandleFunc("DELETE /admin/reset/reports", apiCfg.handlerResetReports) //
-	
+	mux.HandleFunc("DELETE /admin/reset/reports", apiCfg.handlerResetReports)
+
 	srv := &http.Server{
 		Addr:              ":" + port,
 		Handler:           mux,
