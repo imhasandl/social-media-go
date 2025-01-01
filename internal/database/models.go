@@ -42,7 +42,7 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Email     string
+	Username  string
 	Password  string
 	IsPremium bool
-	Username  string
 }

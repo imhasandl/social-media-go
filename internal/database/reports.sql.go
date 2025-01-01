@@ -11,10 +11,19 @@ import (
 	"github.com/google/uuid"
 )
 
-const getReportByID = `-- name: GetReportByID :one
+const deleteReportByID = `-- name: DeleteReportByID :exec
 DELETE FROM reports
 WHERE report_id = $1
-RETURNING report_id, created_at, updated_at, post_id, user_id, reason
+`
+
+func (q *Queries) DeleteReportByID(ctx context.Context, reportID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteReportByID, reportID)
+	return err
+}
+
+const getReportByID = `-- name: GetReportByID :one
+SELECT report_id, created_at, updated_at, post_id, user_id, reason FROM reports 
+WHERE report_id = $1
 `
 
 func (q *Queries) GetReportByID(ctx context.Context, reportID uuid.UUID) (Report, error) {

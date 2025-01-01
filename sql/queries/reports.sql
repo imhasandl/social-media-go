@@ -11,9 +11,12 @@ VALUES(
 RETURNING *;
 
 -- name: GetReportByID :one
-DELETE FROM reports
-WHERE report_id = $1
-RETURNING *;
+SELECT * FROM reports 
+WHERE report_id = $1;
 
 -- name: ListAllReports :many
 SELECT * FROM reports;
+
+-- name: DeleteReportByID :exec
+DELETE FROM reports
+WHERE report_id = $1;
