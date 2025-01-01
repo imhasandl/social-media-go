@@ -85,6 +85,8 @@ func main() {
 	mux.HandleFunc("DELETE /api/posts/{post_id}", apiCfg.handlerDeletePostByID)
 
 	mux.HandleFunc("POST /api/posts/report", apiCfg.handlerReportPost) //
+	mux.HandleFunc("GET /api/posts/report", apiCfg.handlerListAllReports)
+	mux.HandleFunc("GET /api/posts/report/{report_id}", apiCfg.handlerGetReportByID)
 
 	mux.HandleFunc("DELETE /admin/reset/users", apiCfg.handlerResetUsers)
 	mux.HandleFunc("DELETE /admin/reset/posts", apiCfg.handlerResetPosts)

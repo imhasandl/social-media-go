@@ -10,9 +10,10 @@ VALUES(
 )
 RETURNING *;
 
--- name: DeleteReportByID :exec
-DELETE FROM reports 
-WHERE report_id = $1;
+-- name: GetReportByID :one
+DELETE FROM reports
+WHERE report_id = $1
+RETURNING *;
 
 -- name: ListAllReports :many
 SELECT * FROM reports;

@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/imhasandl/go-restapi/internal/auth"
+	// "github.com/imhasandl/go-restapi/internal/auth"
 	"github.com/imhasandl/go-restapi/internal/database"
 )
 
-type ReportPostParams struct {
+type ReportPost struct {
 	ReportID  uuid.UUID `json:"report_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -22,10 +22,11 @@ type ReportPostParams struct {
 func (cfg *apiConfig) handlerReportPost(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		PostID uuid.UUID
+		UserID uuid.UUID
 		Reason string `json:"reason"`
 	}
 	type response struct {
-		ReportPostParams
+		ReportPost
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -36,22 +37,22 @@ func (cfg *apiConfig) handlerReportPost(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	token, err := auth.GetBearerToken(r.Header)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "invalid header bearer - GetBearerToken", err)
-		return
-	}
+	// token, err := auth.GetBearerToken(r.Header)
+	// if err != nil {
+	// 	respondWithError(w, http.StatusBadRequest, "invalid header bearer - GetBearerToken", err)
+	// 	return
+	// }
 
-	userID, err := auth.ValidateJWT(token, cfg.jwtSecret)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "can't validate JWT", err)
-		return
-	}
+	// userID, err := auth.ValidateJWT(token, cfg.jwtSecret)
+	// if err != nil {
+	// 	respondWithError(w, http.StatusBadRequest, "can't validate JWT", err)
+	// 	return
+	// }
 
 	report, err := cfg.db.ReportPost(r.Context(), database.ReportPostParams{
 		ReportID: uuid.New(),
 		PostID: params.PostID,
-		UserID: userID,
+		UserID: params.UserID,
 		Reason: params.Reason,
 	})
 	if err != nil {
@@ -60,7 +61,7 @@ func (cfg *apiConfig) handlerReportPost(w http.ResponseWriter, r *http.Request) 
 	}
 	
 	respondWithJSON(w, http.StatusOK, response{
-		ReportPostParams: ReportPostParams{
+		ReportPost: ReportPost{
 			ReportID: report.ReportID,
 			CreatedAt: report.CreatedAt,
 			UpdatedAt: report.UpdatedAt,
@@ -71,10 +72,42 @@ func (cfg *apiConfig) handlerReportPost(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-// func (cfg *apiConfig) handlerListAllReports(w http.ResponseWriter, r *http.Request) {
-	
-// }
+func (cfg *apiConfig) handlerListAllReports(w http.ResponseWriter, r *http.Request) {
+	reports, err := cfg.db.ListAllReports(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't get all reports from db - handlerListAllReports", err)
+		return
+	}
 
-// func (cfg *apiConfig) handlerDeleteReportByID(w http.ResponseWriter, r *http.Request) {
+	respondWithJSON(w, http.StatusOK, reports)
+}
 
-// }
+func (cfg *apiConfig) handlerGetReportByID(w http.ResponseWriter, r *http.Request) {
+	type response struct {
+		ReportPost
+	}
+
+	reportIDString := r.PathValue("report_id")
+	reportID, err := uuid.Parse(reportIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't parse report id - handlerGetReportByID", err)
+		return
+	}
+
+	report, err := cfg.db.GetReportByID(r.Context(), reportID)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't get post by id - handlerGetReportByID", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, response{
+		ReportPost: ReportPost{
+			ReportID: report.ReportID,
+			CreatedAt: report.CreatedAt,
+			UpdatedAt: report.UpdatedAt,
+			PostID: report.PostID,
+			UserID: report.UserID,
+			Reason: report.Reason,
+		},
+	})
+}

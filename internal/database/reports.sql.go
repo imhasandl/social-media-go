@@ -11,14 +11,24 @@ import (
 	"github.com/google/uuid"
 )
 
-const deleteReportByID = `-- name: DeleteReportByID :exec
-DELETE FROM reports 
+const getReportByID = `-- name: GetReportByID :one
+DELETE FROM reports
 WHERE report_id = $1
+RETURNING report_id, created_at, updated_at, post_id, user_id, reason
 `
 
-func (q *Queries) DeleteReportByID(ctx context.Context, reportID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deleteReportByID, reportID)
-	return err
+func (q *Queries) GetReportByID(ctx context.Context, reportID uuid.UUID) (Report, error) {
+	row := q.db.QueryRowContext(ctx, getReportByID, reportID)
+	var i Report
+	err := row.Scan(
+		&i.ReportID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.PostID,
+		&i.UserID,
+		&i.Reason,
+	)
+	return i, err
 }
 
 const listAllReports = `-- name: ListAllReports :many
