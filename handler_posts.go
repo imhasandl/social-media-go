@@ -16,6 +16,14 @@ type Post struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	UserID    uuid.UUID `json:"user_id"`
 	Body      string    `json:"body"`
+	Likes     int32     `json:"likes"`
+}
+
+type PostsLike struct {
+	ID        uuid.UUID
+	PostID    uuid.UUID
+	UserID    uuid.UUID
+	CreatedAt time.Time
 }
 
 func (cfg *apiConfig) handlerCreatePost(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +71,7 @@ func (cfg *apiConfig) handlerCreatePost(w http.ResponseWriter, r *http.Request) 
 			UpdatedAt: post.UpdatedAt,
 			UserID:    post.UserID,
 			Body:      post.Body,
+			Likes:     post.Likes,
 		},
 	})
 }
@@ -170,4 +179,64 @@ func (cfg *apiConfig) handlerDeletePostByID(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (cfg *apiConfig) handlerLikePost(w http.ResponseWriter, r *http.Request) {
+	type response struct {
+		PostsLike
+	}
+
+	postIDString := r.PathValue("post_id")
+	postID, err := uuid.Parse(postIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't parse post id - handlerLikePost", err)
+		return
+	}
+
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't get header bearer - handlerLikePost", err)
+		return
+	}
+
+	userID, err := auth.ValidateJWT(token, cfg.jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "can't  validate jwt token - handlerLikePost", err)
+		return
+	}
+
+	postLike, err := cfg.db.LikePost(r.Context(), database.LikePostParams{
+		ID:     uuid.New(),
+		PostID: postID,
+		UserID: userID,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't like post - handlerLikePost", err)
+		return
+	}
+
+	err = cfg.db.IncrementPostLike(r.Context(), postID)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't increment post's likes - handlerLikePost", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, response{
+		PostsLike: PostsLike{
+			ID:        postLike.ID,
+			PostID:    postLike.PostID,
+			UserID:    postLike.UserID,
+			CreatedAt: postLike.CreatedAt,
+		},
+	})
+}
+
+func (cfg *apiConfig) handlerListLikePost(w http.ResponseWriter, r *http.Request) {
+	likePosts, err := cfg.db.ListLikePost(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't list LikePost table - handlerListLikePost", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, likePosts)
 }

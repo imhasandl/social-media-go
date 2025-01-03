@@ -1,13 +1,14 @@
 -- name: CreatePost :one
-INSERT INTO posts (id, created_at, updated_at, user_id, body)
+INSERT INTO posts (id, created_at, updated_at, user_id, body, likes)
 VALUES (
    $1,
    NOW(),
    NOW(),
    $2,
-   $3
+   $3,
+   $4
 )
-RETURNING id, created_at, updated_at, user_id, body;
+RETURNING id, created_at, updated_at, user_id, body, likes;
 
 -- name: GetPosts :many
 SELECT * FROM posts;
@@ -23,3 +24,7 @@ WHERE id = $2;
 
 -- name: DeletePostByID :exec
 DELETE FROM posts WHERE id = $1;
+
+-- name: IncrementPostLike :exec
+UPDATE posts SET likes = likes + 1
+WHERE id = $1;

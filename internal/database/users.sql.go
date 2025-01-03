@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -156,26 +157,32 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const listAllUsers = `-- name: ListAllUsers :many
-SELECT id, created_at, updated_at, email, username, password, is_premium FROM users
+SELECT id, created_at, updated_at, email, username FROM users
 `
 
-func (q *Queries) ListAllUsers(ctx context.Context) ([]User, error) {
+type ListAllUsersRow struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Email     string
+	Username  string
+}
+
+func (q *Queries) ListAllUsers(ctx context.Context) ([]ListAllUsersRow, error) {
 	rows, err := q.db.QueryContext(ctx, listAllUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []ListAllUsersRow
 	for rows.Next() {
-		var i User
+		var i ListAllUsersRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Email,
 			&i.Username,
-			&i.Password,
-			&i.IsPremium,
 		); err != nil {
 			return nil, err
 		}
