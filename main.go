@@ -87,8 +87,9 @@ func main() {
 	mux.HandleFunc("GET /api/posts/reports/{report_id}", apiCfg.handlerGetReportByID)
 	mux.HandleFunc("DELETE /api/posts/reports/{report_id}", apiCfg.handlerDeleteReportByID)
 
-	mux.HandleFunc("POST /api/posts/like/{post_id}", apiCfg.handlerLikePost)
-	mux.HandleFunc("GET /api/posts/likes", apiCfg.handlerListLikePost)
+	mux.HandleFunc("POST /api/posts/like/{post_id}", apiCfg.handlerLikePost) 
+	mux.HandleFunc("DELETE /api/posts/dislike/{likepost_id}", apiCfg.handlerDislikePost)
+	mux.HandleFunc("GET /api/posts/likes", apiCfg.handlerListLikePost) 
 
 	// OTHER
 	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
@@ -99,6 +100,7 @@ func main() {
 	mux.HandleFunc("DELETE /admin/reset/users", apiCfg.handlerResetUsers)
 	mux.HandleFunc("DELETE /admin/reset/posts", apiCfg.handlerResetPosts)
 	mux.HandleFunc("DELETE /admin/reset/reports", apiCfg.handlerResetReports)
+	mux.HandleFunc("DELETE /admin/reset/likepost", apiCfg.handlerResetLikePost)
 	
 	srv := &http.Server{
 		Addr:              ":" + port,

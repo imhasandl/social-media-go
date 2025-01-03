@@ -205,6 +205,13 @@ func (cfg *apiConfig) handlerLikePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Checks if the user already liked the post
+	err = cfg.db.CheckIfUserLikeAlready(r.Context(), userID)
+	if err == nil {
+		respondWithError(w, http.StatusBadRequest, "you can only like this post once - handlerLikePost", err) 
+		return
+	}
+
 	postLike, err := cfg.db.LikePost(r.Context(), database.LikePostParams{
 		ID:     uuid.New(),
 		PostID: postID,
@@ -215,6 +222,7 @@ func (cfg *apiConfig) handlerLikePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Increments the likes column in posts table
 	err = cfg.db.IncrementPostLike(r.Context(), postID)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "can't increment post's likes - handlerLikePost", err)
@@ -231,6 +239,45 @@ func (cfg *apiConfig) handlerLikePost(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (cfg *apiConfig) handlerDislikePost(w http.ResponseWriter, r *http.Request) {
+	postIDString := r.PathValue("likepost_id")
+	postID, err := uuid.Parse(postIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't parse post id - handlerDislikePost", err)
+		return
+	}
+
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "can't get bearer from header - handlerDislikePost", err)
+		return
+	}
+
+	userID, err := auth.ValidateJWT(token, cfg.jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "can't validate jwt - handlerDislikePost", err)
+		return
+	}
+
+	err = cfg.db.DislikePost(r.Context(), database.DislikePostParams{
+		UserID: userID,
+		PostID: postID,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "can't dislike the post - handlerDislikePost", err)
+		return
+	}
+
+	// Decrements the likes column in posts table
+	err = cfg.db.DecrementPostLike(r.Context(), postID)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't decrement post's likes - handlerDislikePost", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (cfg *apiConfig) handlerListLikePost(w http.ResponseWriter, r *http.Request) {
 	likePosts, err := cfg.db.ListLikePost(r.Context())
 	if err != nil {
@@ -240,3 +287,4 @@ func (cfg *apiConfig) handlerListLikePost(w http.ResponseWriter, r *http.Request
 
 	respondWithJSON(w, http.StatusOK, likePosts)
 }
+
