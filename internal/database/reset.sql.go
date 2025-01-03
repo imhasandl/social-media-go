@@ -9,6 +9,15 @@ import (
 	"context"
 )
 
+const resetLikePost = `-- name: ResetLikePost :exec
+DELETE FROM posts_likes
+`
+
+func (q *Queries) ResetLikePost(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetLikePost)
+	return err
+}
+
 const resetPosts = `-- name: ResetPosts :exec
 DELETE FROM posts
 `

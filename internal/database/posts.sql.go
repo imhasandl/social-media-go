@@ -127,13 +127,3 @@ func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
 	}
 	return items, nil
 }
-
-const incrementPostLike = `-- name: IncrementPostLike :exec
-UPDATE posts SET likes = likes + 1
-WHERE id = $1
-`
-
-func (q *Queries) IncrementPostLike(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, incrementPostLike, id)
-	return err
-}

@@ -67,14 +67,31 @@ func (cfg *apiConfig) handlerResetReports(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = cfg.db.ResetReports(r.Context())
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte("Reset reports table, completed"))
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "can't reset posts", err)
+		log.Printf("Error writing JSON: %s", err)
+	}
+}
+
+func (cfg *apiConfig) handlerResetLikePost(w http.ResponseWriter, r *http.Request) {
+	if cfg.status != "ADMIN" {
+		w.WriteHeader(http.StatusForbidden)
+		_, err := w.Write([]byte("Reset like's of post only allowed in admin environment"))
+		if err != nil {
+			log.Printf("Error writing JSON: %s", err)
+		}
+		return
+	}
+
+	err := cfg.db.ResetLikePost(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't reset like's of post", err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	_, err = w.Write([]byte("Reset reports table, completed"))
+	_, err = w.Write([]byte("Reset posts_like table, completed"))
 	if err != nil {
 		log.Printf("Error writing JSON: %s", err)
 	}

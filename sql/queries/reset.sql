@@ -6,3 +6,6 @@ DELETE FROM posts;
 
 -- name: ResetReports :exec
 DELETE FROM reports;
+
+-- name: ResetLikePost :exec
+DELETE FROM posts_likes;

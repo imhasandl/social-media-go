@@ -11,12 +11,48 @@ import (
 	"github.com/google/uuid"
 )
 
-const dislikePost = `-- name: DislikePost :exec
-DELETE FROM posts_likes WHERE user_id = $1
+const checkIfUserLikeAlready = `-- name: CheckIfUserLikeAlready :exec
+SELECT id FROM posts_likes
+WHERE user_id = $1
 `
 
-func (q *Queries) DislikePost(ctx context.Context, userID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, dislikePost, userID)
+func (q *Queries) CheckIfUserLikeAlready(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, checkIfUserLikeAlready, userID)
+	return err
+}
+
+const decrementPostLike = `-- name: DecrementPostLike :exec
+UPDATE posts SET likes = likes - 1
+WHERE id = $1
+`
+
+func (q *Queries) DecrementPostLike(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, decrementPostLike, id)
+	return err
+}
+
+const dislikePost = `-- name: DislikePost :exec
+DELETE FROM posts_likes 
+WHERE user_id = $1 AND post_id = $2
+`
+
+type DislikePostParams struct {
+	UserID uuid.UUID
+	PostID uuid.UUID
+}
+
+func (q *Queries) DislikePost(ctx context.Context, arg DislikePostParams) error {
+	_, err := q.db.ExecContext(ctx, dislikePost, arg.UserID, arg.PostID)
+	return err
+}
+
+const incrementPostLike = `-- name: IncrementPostLike :exec
+UPDATE posts SET likes = likes + 1
+WHERE id = $1
+`
+
+func (q *Queries) IncrementPostLike(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, incrementPostLike, id)
 	return err
 }
 

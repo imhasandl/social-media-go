@@ -24,7 +24,3 @@ WHERE id = $2;
 
 -- name: DeletePostByID :exec
 DELETE FROM posts WHERE id = $1;
-
--- name: IncrementPostLike :exec
-UPDATE posts SET likes = likes + 1
-WHERE id = $1;
