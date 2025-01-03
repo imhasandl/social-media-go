@@ -96,7 +96,7 @@ func main() {
 	mux.HandleFunc("DELETE /admin/reset/users", apiCfg.handlerResetUsers)
 	mux.HandleFunc("DELETE /admin/reset/posts", apiCfg.handlerResetPosts)
 	mux.HandleFunc("DELETE /admin/reset/reports", apiCfg.handlerResetReports)
-
+	
 	srv := &http.Server{
 		Addr:              ":" + port,
 		Handler:           mux,
