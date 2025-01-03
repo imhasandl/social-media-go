@@ -122,13 +122,13 @@ func (cfg *apiConfig) handlerGetUserByUsername(w http.ResponseWriter, r *http.Re
 	params := parameters{}
 	err := decoder.Decode(&params)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "can't get user bu username", err)
+		respondWithError(w, http.StatusInternalServerError, "can't get user bu username - handlerGetUserByUsername", err)
 		return
 	}
 
 	user, err := cfg.db.GetUserByUsername(r.Context(), params.Username)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "can't get user by username", err)
+		respondWithError(w, http.StatusInternalServerError, "can't get user by username - handlerGetUserByUsername", err)
 		return
 	}
 
