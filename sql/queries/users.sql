@@ -16,7 +16,7 @@ WHERE id = $3
 RETURNING *;
 
 -- name: ListAllUsers :many
-SELECT * FROM users;
+SELECT id, created_at, updated_at, email, username FROM users;
 
 -- name: GetUserByID :one
 SELECT * FROM users

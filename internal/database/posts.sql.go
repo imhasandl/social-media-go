@@ -28,25 +28,32 @@ func (q *Queries) ChangePostByID(ctx context.Context, arg ChangePostByIDParams) 
 }
 
 const createPost = `-- name: CreatePost :one
-INSERT INTO posts (id, created_at, updated_at, user_id, body)
+INSERT INTO posts (id, created_at, updated_at, user_id, body, likes)
 VALUES (
    $1,
    NOW(),
    NOW(),
    $2,
-   $3
+   $3,
+   $4
 )
-RETURNING id, created_at, updated_at, user_id, body
+RETURNING id, created_at, updated_at, user_id, body, likes
 `
 
 type CreatePostParams struct {
 	ID     uuid.UUID
 	UserID uuid.UUID
 	Body   string
+	Likes  int32
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
-	row := q.db.QueryRowContext(ctx, createPost, arg.ID, arg.UserID, arg.Body)
+	row := q.db.QueryRowContext(ctx, createPost,
+		arg.ID,
+		arg.UserID,
+		arg.Body,
+		arg.Likes,
+	)
 	var i Post
 	err := row.Scan(
 		&i.ID,
@@ -54,6 +61,7 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		&i.UpdatedAt,
 		&i.UserID,
 		&i.Body,
+		&i.Likes,
 	)
 	return i, err
 }
@@ -68,7 +76,7 @@ func (q *Queries) DeletePostByID(ctx context.Context, id uuid.UUID) error {
 }
 
 const getPostByID = `-- name: GetPostByID :one
-SELECT id, created_at, updated_at, user_id, body FROM posts
+SELECT id, created_at, updated_at, user_id, body, likes FROM posts
 WHERE id = $1
 `
 
@@ -81,12 +89,13 @@ func (q *Queries) GetPostByID(ctx context.Context, id uuid.UUID) (Post, error) {
 		&i.UpdatedAt,
 		&i.UserID,
 		&i.Body,
+		&i.Likes,
 	)
 	return i, err
 }
 
 const getPosts = `-- name: GetPosts :many
-SELECT id, created_at, updated_at, user_id, body FROM posts
+SELECT id, created_at, updated_at, user_id, body, likes FROM posts
 `
 
 func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
@@ -104,6 +113,7 @@ func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
 			&i.UpdatedAt,
 			&i.UserID,
 			&i.Body,
+			&i.Likes,
 		); err != nil {
 			return nil, err
 		}
@@ -116,4 +126,14 @@ func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const incrementPostLike = `-- name: IncrementPostLike :exec
+UPDATE posts SET likes = likes + 1
+WHERE id = $1
+`
+
+func (q *Queries) IncrementPostLike(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, incrementPostLike, id)
+	return err
 }

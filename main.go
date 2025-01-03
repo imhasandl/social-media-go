@@ -87,6 +87,9 @@ func main() {
 	mux.HandleFunc("GET /api/posts/reports/{report_id}", apiCfg.handlerGetReportByID)
 	mux.HandleFunc("DELETE /api/posts/reports/{report_id}", apiCfg.handlerDeleteReportByID)
 
+	mux.HandleFunc("POST /api/posts/like/{post_id}", apiCfg.handlerLikePost)
+	mux.HandleFunc("GET /api/posts/likes", apiCfg.handlerListLikePost)
+
 	// OTHER
 	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
 	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevoke)

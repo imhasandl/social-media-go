@@ -17,6 +17,14 @@ type Post struct {
 	UpdatedAt time.Time
 	UserID    uuid.UUID
 	Body      string
+	Likes     int32
+}
+
+type PostsLike struct {
+	ID        uuid.UUID
+	PostID    uuid.UUID
+	UserID    uuid.UUID
+	CreatedAt time.Time
 }
 
 type RefreshToken struct {
