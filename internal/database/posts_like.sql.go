@@ -46,6 +46,18 @@ func (q *Queries) DislikePost(ctx context.Context, arg DislikePostParams) error 
 	return err
 }
 
+const getPostLikes = `-- name: GetPostLikes :one
+SELECT likes from posts
+WHERE id = $1
+`
+
+func (q *Queries) GetPostLikes(ctx context.Context, id uuid.UUID) (int32, error) {
+	row := q.db.QueryRowContext(ctx, getPostLikes, id)
+	var likes int32
+	err := row.Scan(&likes)
+	return likes, err
+}
+
 const incrementPostLike = `-- name: IncrementPostLike :exec
 UPDATE posts SET likes = likes + 1
 WHERE id = $1

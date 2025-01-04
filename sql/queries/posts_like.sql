@@ -26,3 +26,7 @@ WHERE id = $1;
 -- name: DecrementPostLike :exec
 UPDATE posts SET likes = likes - 1
 WHERE id = $1;
+
+-- name: GetPostLikes :one
+SELECT likes from posts
+WHERE id = $1; 

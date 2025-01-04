@@ -208,7 +208,7 @@ func (cfg *apiConfig) handlerLikePost(w http.ResponseWriter, r *http.Request) {
 	// Checks if the user already liked the post
 	err = cfg.db.CheckIfUserLikeAlready(r.Context(), userID)
 	if err == nil {
-		respondWithError(w, http.StatusBadRequest, "you can only like this post once - handlerLikePost", err) 
+		respondWithError(w, http.StatusBadRequest, "you can only like this post once - handlerLikePost", err)
 		return
 	}
 
@@ -288,3 +288,25 @@ func (cfg *apiConfig) handlerListLikePost(w http.ResponseWriter, r *http.Request
 	respondWithJSON(w, http.StatusOK, likePosts)
 }
 
+func (cfg *apiConfig) handlerGetPostLikes(w http.ResponseWriter, r *http.Request) {
+	type response struct {
+		Likes int32 `json:"likes"`
+	}
+
+	postIDString := r.PathValue("post_id")
+	postID, err := uuid.Parse(postIDString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't parse path value - handlerGetPostLikes", err)
+		return
+	}
+
+	likes, err := cfg.db.GetPostLikes(r.Context(), postID)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't get post's likes - handlerGetPostLikes", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, response{
+		Likes: likes,
+	})
+}
