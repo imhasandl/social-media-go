@@ -87,17 +87,18 @@ func main() {
 	mux.HandleFunc("GET /api/posts/reports/{report_id}", apiCfg.handlerGetReportByID)
 	mux.HandleFunc("DELETE /api/posts/reports/{report_id}", apiCfg.handlerDeleteReportByID)
 
+	mux.HandleFunc("GET /api/posts/mostlikes", apiCfg.handlerGetMostLikedPost)
 	mux.HandleFunc("POST /api/posts/like/{post_id}", apiCfg.handlerLikePost)
+	mux.HandleFunc("DELETE /api/posts/dislike/{likepost_id}", apiCfg.handlerDislikePost)
 	mux.HandleFunc("GET /api/posts/likes", apiCfg.handlerListLikePost)
 	mux.HandleFunc("GET /api/posts/likes/{post_id}", apiCfg.handlerGetPostLikes)
-	mux.HandleFunc("DELETE /api/posts/dislike/{likepost_id}", apiCfg.handlerDislikePost)
 
 	// OTHER
 	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
 	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevoke)
 	
 	mux.HandleFunc("POST /api/webhooks", apiCfg.handlerWebhook)
-
+	
 	mux.HandleFunc("DELETE /admin/reset/users", apiCfg.handlerResetUsers)
 	mux.HandleFunc("DELETE /admin/reset/posts", apiCfg.handlerResetPosts)
 	mux.HandleFunc("DELETE /admin/reset/reports", apiCfg.handlerResetReports)

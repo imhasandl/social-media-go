@@ -310,3 +310,13 @@ func (cfg *apiConfig) handlerGetPostLikes(w http.ResponseWriter, r *http.Request
 		Likes: likes,
 	})
 }
+
+func (cfg *apiConfig) handlerGetMostLikedPost(w http.ResponseWriter, r *http.Request) {
+	posts, err := cfg.db.GetMostLikedPosts(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "can't get most likes posts - handlerGetMostLikedPost", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, posts)
+}

@@ -24,3 +24,7 @@ WHERE id = $2;
 
 -- name: DeletePostByID :exec
 DELETE FROM posts WHERE id = $1;
+
+-- name: GetMostLikedPosts :many
+SELECT * FROM posts
+ORDER BY likes ASC LIMIT 10;
